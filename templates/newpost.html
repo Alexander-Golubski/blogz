@@ -6,12 +6,12 @@
     <form method='post'>
             <label>
                 Title:
-                <input type='text' name='title' />
+                <input type='text' name='title' value='{{blog_title}}' />
             </label>
-                <p>Body text:</p>
-                <p><textarea type='text' name='body'>
-                </textarea>
-            </p>
+            <p class='error'>{{title_error}}</p>
+            <p>Body text:</p>
+            <p><textarea type='text' name='body'>{{body}}</textarea></p>
+            <p class='error'>{{body_error}}</p>
             <input type='submit' value='Add Entry' />
         </form>
 
