@@ -22,7 +22,6 @@ class User(db.Model):
         self.password = password
 
 class Blog(db.Model):
-#inherits some traits from existing class Model within SQLAlchemy
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
@@ -33,6 +32,12 @@ class Blog(db.Model):
         self.title = title
         self.body = body
         self.owner = owner
+
+@app.before_request
+def require_login():
+    allowed_routes = ["login", "signup"]
+    if request.endpoint not in allowed_routes and "username" not in session:
+        return redirect("/login")
 
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
@@ -78,6 +83,61 @@ def newpost():
 
     return render_template('newpost.html', title='New Post', 
         title_error=title_error, body_error=body_error)
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            flash('Username not in database', 'error')
+        elif user.password == password:
+            session["username"] = username
+            flash("Logged in")
+            return redirect("/newpost")
+        else:
+            flash("Incorrect password", 'error')        
+
+    return render_template("login.html")
+
+@app.route("/signup", methods=["POST", "GET"])
+def signup():
+
+    error = ''
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        verify = request.form["verify"]
+        existing_user = User.query.filter_by(username=username).first()
+
+        if len(username) > 20:
+            error = "Username must be 20 characters or less"
+        elif len(username) < 3:
+            error = "Username must have 3 or more characters"
+        elif len(password) < 3:
+            error = "Password must have 3 or more characters"
+        elif password != verify:
+            error = "Password and verification do not match"
+        elif username == '' or password == '' or verify == '':
+            error =  "Please enter a username, password, and verification"
+        if not existing_user:
+        #elif len(username) <= 20 and len(username) > 3 and len(password) > 3 and password == verify and not existing_user:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session["username"] = username
+            return redirect("/newpost")
+        else:
+            error = 'Username already exists'
+
+    return render_template("signup.html", error=error)
+
+@app.route("/logout")
+def logout():
+    del session["username"]
+    return redirect("/blog")
 
 if __name__ == '__main__':
     app.run()

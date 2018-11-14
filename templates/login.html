@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Log in to Get It Done!</h1>
-<p>If you don't have an account, you may <a href="/register">register</a></p>
+<h1>Log in</h1>
+<p>If you don't have an account, you may <a href="/signup">register</a></p>
+
+<p class="error">{{error}}</p>
+
 <form action="login" method="post">
     <table>
         <tr>
             <td>
-                <label for="email">Email</label>
+                <label for="username">Username</label>
             </td>
             <td>
-                <input name="email" type="email" value="{{ email }}">
+                <input name="username" type="username" value="{{ username }}">
             </td>
         </tr>
         <tr>
