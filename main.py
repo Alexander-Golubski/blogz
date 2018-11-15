@@ -35,18 +35,39 @@ class Blog(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ["login", "signup"]
+    allowed_routes = ["login", "signup", "index", "home"]
     if request.endpoint not in allowed_routes and "username" not in session:
         return redirect("/login")
 
+@app.route('/', methods=['GET'])
+def home():
+    users = User.query.all()
+
+    return render_template('home.html', title='home', users=users)
+
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
+    #ownerid = request.form['ownerid']
+    #linked_user = User.query.filter_by(id=ownerid).first()
+    
+
+    users = User.query.all()
+    user = request.args.get('user')
+    sel_user = User.query.filter_by(id=user).first()
+
+    #user_blogs = Blog.query.filter_by(owner_id=sel_user.id).all()
+    user_blogs = Blog.query.filter_by(owner_id=user).all()
+
     blogs = Blog.query.all()
     blog_id = request.args.get('id')
     sel_blog = Blog.query.filter_by(id=blog_id).first()
 
     if blog_id:
         return render_template('blog-page.html', blog=sel_blog)
+    
+    if user:
+        return render_template('user_blogs.html', title='Blog Posts', 
+            user=sel_user, blog=sel_blog, user_blogs=user_blogs)
 
     return render_template('index.html', title='Blog', blogs=blogs)
 
