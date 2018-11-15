@@ -47,15 +47,11 @@ def home():
 
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
-    #ownerid = request.form['ownerid']
-    #linked_user = User.query.filter_by(id=ownerid).first()
-    
 
     users = User.query.all()
     user = request.args.get('user')
     sel_user = User.query.filter_by(id=user).first()
 
-    #user_blogs = Blog.query.filter_by(owner_id=sel_user.id).all()
     user_blogs = Blog.query.filter_by(owner_id=user).all()
 
     blogs = Blog.query.all()
@@ -143,15 +139,14 @@ def signup():
             error = "Password and verification do not match"
         elif username == '' or password == '' or verify == '':
             error =  "Please enter a username, password, and verification"
-        if not existing_user:
-        #elif len(username) <= 20 and len(username) > 3 and len(password) > 3 and password == verify and not existing_user:
+        elif existing_user:
+            error = 'Username already exists'
+        elif len(username) <= 20 and len(username) >= 3 and len(password) >= 3 and password == verify and not existing_user:
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
             session["username"] = username
             return redirect("/newpost")
-        else:
-            error = 'Username already exists'
 
     return render_template("signup.html", error=error)
 
